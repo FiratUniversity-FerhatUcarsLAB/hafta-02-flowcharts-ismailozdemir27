@@ -1,0 +1,61 @@
+digraph ATM {
+    rankdir=TB;
+    node [shape=box, style=filled, fillcolor=lightgray];
+
+    Start [label="Başla", shape=ellipse, fillcolor=lightblue];
+    ReadCard [label="Kart Takıldı?"];
+    CardBlocked [label="Kart Bloke mi?", shape=diamond];
+    AskPIN [label="PIN Gir"];
+    CheckPIN [label="PIN Doğru mu?", shape=diamond];
+    PINAttemptLimit [label="3 Hatalı Giriş Oldu mu?", shape=diamond];
+    BlockCard [label="Kart Bloke Edildi", fillcolor=red];
+    MainMenu [label="Ana Menü:\n1) Para Çek\n2) Bakiye Sorgula\n3) Kart İade"];
+    ShowBalance [label="Bakiye Göster"];
+    EjectCard [label="Kart İade", shape=ellipse, fillcolor=lightblue];
+    
+    WithdrawFlow [label="Tutar Gir"];
+    CheckAmountValid [label="Tutar\n20 TL katı mı?", shape=diamond];
+    CheckBalance [label="Yeterli Bakiye Var mı?", shape=diamond];
+    CheckDailyLimit [label="Günlük Limit Aşıldı mı?", shape=diamond];
+    DispenseCash [label="Para Ver"];
+    PrintReceipt [label="Fiş Yazdır"];
+    UpdateBalance [label="Bakiye Güncelle"];
+    AnotherTransaction [label="Başka İşlem?\n(E/H)", shape=diamond];
+    End [label="Son", shape=ellipse, fillcolor=lightblue];
+
+    // Bağlantılar
+    Start -> ReadCard;
+    ReadCard -> CardBlocked;
+    CardBlocked -> AskPIN [label="Hayır"];
+    CardBlocked -> BlockCard [label="Evet"];
+    BlockCard -> End;
+
+    AskPIN -> CheckPIN;
+    CheckPIN -> MainMenu [label="Doğru"];
+    CheckPIN -> PINAttemptLimit [label="Yanlış"];
+    PINAttemptLimit -> AskPIN [label="< 3"];
+    PINAttemptLimit -> BlockCard [label="= 3"];
+
+    MainMenu -> WithdrawFlow [label="1) Para Çek"];
+    MainMenu -> ShowBalance [label="2) Bakiye"];
+    MainMenu -> EjectCard [label="3) Kart İade"];
+    ShowBalance -> AnotherTransaction;
+
+    WithdrawFlow -> CheckAmountValid;
+    CheckAmountValid -> CheckBalance [label="Evet"];
+    CheckAmountValid -> WithdrawFlow [label="Hayır"];
+
+    CheckBalance -> CheckDailyLimit [label="Evet"];
+    CheckBalance -> WithdrawFlow [label="Hayır"];
+
+    CheckDailyLimit -> DispenseCash [label="Hayır"];
+    CheckDailyLimit -> WithdrawFlow [label="Evet"];
+
+    DispenseCash -> PrintReceipt;
+    PrintReceipt -> UpdateBalance;
+    UpdateBalance -> AnotherTransaction;
+
+    AnotherTransaction -> MainMenu [label="Evet"];
+    AnotherTransaction -> EjectCard [label="Hayır"];
+    EjectCard -> End;
+}
