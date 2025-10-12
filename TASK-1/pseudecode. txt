@@ -1,0 +1,158 @@
+// --- Başlangıç / Değişkenler ---
+card_inserted = false
+card_blocked = false
+user_authenticated = false
+
+// Kart ve kullanıcı bilgileri (gerçekte bankadan gelen veri)
+account_balance = 3500          // örnek bakiye (TL)
+daily_withdrawn = 0            // o gün çekilmiş toplam (TL)
+card_pin_code = "1234"         // kartın gerçek PIN'i (örnek)
+card_blocked_flag = false
+
+// Sabitler
+GUNLUK_LIMIT = 5000
+ASGARI_BANKNOT = 20
+MAKS_PIN_DENEME = 3
+
+// --- Fonksiyonlar ---
+function readCard():
+    card_inserted = true
+    // kart bilgilerini oku (hesap numarası, durum vb.)
+    if card_blocked_flag == true:
+        card_blocked = true
+        return false
+    return true
+
+function askPIN():
+    attempts = 0
+    while attempts < MAKS_PIN_DENEME:
+        entered_pin = prompt("Lütfen PIN giriniz:")
+        if entered_pin == card_pin_code:
+            user_authenticated = true
+            return true
+        else:
+            attempts = attempts + 1
+            remaining = MAKS_PIN_DENEME - attempts
+            display("Hatalı PIN. Kalan deneme: " + remaining)
+    // 3 hatalı deneme oldu
+    card_blocked_flag = true
+    card_blocked = true
+    display("Kartınız bloke olmuştur. Lütfen bankanızla iletişime geçin.")
+    return false
+
+function showBalance():
+    display("Mevcut bakiye: " + account_balance + " TL")
+    display("Bugünkü çekilen: " + daily_withdrawn + " TL (Günlük limit: " + GUNLUK_LIMIT + " TL)")
+
+function requestAmount():
+    // kullanıcıdan çekilecek tutarı al
+    amount = promptNumber("Çekmek istediğiniz tutarı girin (TL):")
+    return amount
+
+function validateAmount(amount):
+    // 1) Pozitif mi?
+    if amount <= 0:
+        display("Geçersiz tutar. Pozitif bir miktar girin.")
+        return false
+
+    // 2) 20 TL'nin katı mı?
+    if amount % ASGARI_BANKNOT != 0:
+        display("Lütfen 20 TL'nin katları şeklinde bir tutar girin.")
+        return false
+
+    // 3) Yetersiz bakiye kontrolü
+    if amount > account_balance:
+        display("Yetersiz bakiye.")
+        return false
+
+    // 4) Günlük limit kontrolü
+    if (daily_withdrawn + amount) > GUNLUK_LIMIT:
+        remaining_limit = GUNLUK_LIMIT - daily_withdrawn
+        display("Günlük limit aşılıyor. Kalan günlük limit: " + remaining_limit + " TL")
+        return false
+
+    // 5) ATM'nin fiziksel para stoğu (isteğe bağlı)
+    if not hasCashInATM(amount):
+        display("ATM'de yeterli nakit yok. Lütfen başka bir ATM deneyin.")
+        return false
+
+    return true
+
+function hasCashInATM(amount):
+    // ATM iç stok modeli: her banknot türünden stok bilgisi olabilir.
+    // Basit model: toplam nakit yeterli ise true döndür.
+    atm_cash_total = getATMCashTotal()  // örnek: 10000 TL
+    if amount > atm_cash_total:
+        return false
+    // gelişmiş: kombinasyonla verilebiliyor mu kontrolü yapılabilir
+    return true
+
+function dispenseCash(amount):
+    // ATM'den nakit ver ve stok güncelle
+    dispenseMechanism(amount)
+    reduceATMCash(amount)
+    display(amount + " TL verildi.")
+
+function printReceipt(amount):
+    receipt = "----- FİŞ -----\n" +
+              "Çekilen: " + amount + " TL\n" +
+              "Kalan bakiye: " + (account_balance - amount) + " TL\n" +
+              "Tarih: " + currentDateTime() + "\n" +
+              "----------------"
+    askPrint = prompt("Fiş almak istiyor musunuz? (E/H)")
+    if askPrint in ["E","e","evet"]:
+        print(receipt)
+        display("Fiş yazdırıldı.")
+    else:
+        display("Fiş istenmedi.")
+
+// --- Ana Akış ---
+if readCard() == false:
+    end // kart yok ya da bloke
+
+if askPIN() == false:
+    // kart bloke edildi veya doğrulama başarısız
+    ejectCard()
+    end
+
+// Başarılı girişten sonra işlem döngüsü
+do:
+    showBalance()
+
+    // 1) Bakiye sorgulama isteği (kullanıcı isterse sadece bakiyeyi görüp başka işlem yapabilir)
+    action = prompt("İşlem seçin: 1) Para Çek  2) Bakiye Sorgula  3) Kart İade")
+    if action == 2:
+        showBalance()
+    else if action == 3:
+        display("Kart iade ediliyor.")
+        ejectCard()
+        break
+
+    // 2) Para çekme akışı (kullanıcı Para Çek'i seçtiyse)
+    if action == 1:
+        amount = requestAmount()
+
+        if validateAmount(amount):
+            // Onay iste (isteğe bağlı)
+            confirm = prompt("Onaylıyor musunuz? " + amount + " TL (E/H)")
+            if confirm in ["E","e","evet"]:
+                // Para ver, bakiye ve günlük çekim güncelle
+                dispenseCash(amount)
+                account_balance = account_balance - amount
+                daily_withdrawn = daily_withdrawn + amount
+
+                // Fiş
+                printReceipt(amount)
+
+                display("İşleminiz başarılı.")
+            else:
+                display("İşlem iptal edildi.")
+        // validateAmount hata mesajlarını fonksiyon zaten gösterir
+
+    // Başka işlem yapmak istiyor musunuz?
+    another = prompt("Başka işlem yapmak ister misiniz? (E/H)")
+while another in ["E","e","evet"]
+
+ejectCard()
+display("Kart iade edildi. İyi günler.")
+end
