@@ -1,0 +1,69 @@
+digraph RandevuAlma {
+    node [shape=box];
+
+    Start [label="Başla"];
+    KimlikDogrulama [label="Kimlik doğrulama"];
+    DogruMu [label="Kimlik doğrulama başarılı mı?", shape=diamond];
+    PoliklinikSecimi [label="Poliklinik seçimi"];
+    DoktorListesi [label="Doktor listesi görüntüleme"];
+    DoktorSecimi [label="Doktor seçimi"];
+    SaatlerGoster [label="Uygun saatleri göster"];
+    RandevuSecimi [label="Randevu saatini seç"];
+    RandevuKaydet [label="Randevuyu kaydet"];
+    SmsGonder [label="SMS gönder"];
+    BasariliMesaj [label="Randevunuz başarıyla oluşturuldu."];
+    BasarisizMesaj [label="Kimlik doğrulama başarısız."];
+
+    End [label="Bitir"];
+
+    Start -> KimlikDogrulama;
+    KimlikDogrulama -> DogruMu;
+    DogruMu -> PoliklinikSecimi [label="Evet"];
+    DogruMu -> BasarisizMesaj [label="Hayır"];
+    BasarisizMesaj -> End;
+
+    PoliklinikSecimi -> DoktorListesi;
+    DoktorListesi -> DoktorSecimi;
+    DoktorSecimi -> SaatlerGoster;
+    SaatlerGoster -> RandevuSecimi;
+    RandevuSecimi -> RandevuKaydet;
+    RandevuKaydet -> SmsGonder;
+    SmsGonder -> BasariliMesaj;
+    BasariliMesaj -> End;
+}
+digraph TahlilSonuclari {
+    node [shape=box];
+
+    Start [label="Başla"];
+    KimlikDogrulama [label="Kimlik doğrulama"];
+    DogruMu [label="Kimlik doğrulama başarılı mı?", shape=diamond];
+    TahlilVarMi [label="Tahlil sonucu var mı?", shape=diamond];
+    SonucHazirMi [label="Sonuç hazır mı?", shape=diamond];
+    SonuclariGoster [label="Sonuçları göster"];
+    PdfIndirmeSecenegi [label="PDF indirme seçeneği"];
+    PdfIndir [label="PDF dosyasını indir"];
+    BeklemeMesaji [label="Sonuçlar hazırlanıyor, lütfen sonra tekrar deneyin"];
+    TahlilYokMesaji [label="Tahlil sonucu bulunamadı"];
+    BasarisizMesaj [label="Kimlik doğrulama başarısız"];
+
+    End [label="Bitir"];
+
+    Start -> KimlikDogrulama;
+    KimlikDogrulama -> DogruMu;
+    DogruMu -> TahlilVarMi [label="Evet"];
+    DogruMu -> BasarisizMesaj [label="Hayır"];
+    BasarisizMesaj -> End;
+
+    TahlilVarMi -> SonucHazirMi [label="Evet"];
+    TahlilVarMi -> TahlilYokMesaji [label="Hayır"];
+    TahlilYokMesaji -> End;
+
+    SonucHazirMi -> SonuclariGoster [label="Evet"];
+    SonucHazirMi -> BeklemeMesaji [label="Hayır"];
+    BeklemeMesaji -> End;
+
+    SonuclariGoster -> PdfIndirmeSecenegi;
+    PdfIndirmeSecenegi -> PdfIndir [label="İndir"];
+    PdfIndirmeSecenegi -> End [label="İndir değil"];
+    PdfIndir -> End;
+}
