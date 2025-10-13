@@ -1,0 +1,53 @@
+digraph ECommerceFlow {
+    rankdir=LR;
+    node [shape=box, style=rounded, fontname="Arial"];
+
+    Start [label="Başlat"]
+    Login [label="Kullanıcı Girişi"]
+    AuthSuccess [label="Giriş Başarılı"]
+    AuthFail [label="Giriş Başarısız\n-> Çıkış"]
+    SearchProduct [label="Ürün Arama"]
+    ViewResults [label="Ürünleri Listele"]
+    SelectProduct [label="Ürün Seç ve Adet Belirle"]
+    StockCheck [label="Stok Kontrolü"]
+    AddToCart [label="Sepete Ekle"]
+    StockFail [label="Yetersiz Stok"]
+    AskContinue [label="Devam mı?\n(Y/N)"]
+    ShowCart [label="Sepeti Göster"]
+    DiscountCode [label="İndirim Kodu Gir"]
+    ApplyDiscount [label="İndirim Uygula"]
+    ShippingCalc [label="Kargo Hesapla"]
+    TotalAmount [label="Toplam Tutar Hesapla"]
+    PaymentInput [label="Kart Bilgilerini Gir"]
+    PaymentProcess [label="Ödeme Yap"]
+    PaymentSuccess [label="Ödeme Başarılı\n-> Sipariş Oluştur"]
+    PaymentFail [label="Ödeme Başarısız\n-> Tekrar Dene"]
+    End [label="Son"]
+
+    // Flow connections
+    Start -> Login
+    Login -> AuthSuccess [label="Doğru"]
+    Login -> AuthFail [label="Yanlış"]
+    AuthSuccess -> SearchProduct
+    SearchProduct -> ViewResults
+    ViewResults -> SelectProduct
+    SelectProduct -> StockCheck
+    StockCheck -> AddToCart [label="Stok Var"]
+    StockCheck -> StockFail [label="Stok Yok"]
+    AddToCart -> AskContinue
+    StockFail -> AskContinue
+    AskContinue -> SearchProduct [label="Evet"]
+    AskContinue -> ShowCart [label="Hayır"]
+
+    ShowCart -> DiscountCode
+    DiscountCode -> ApplyDiscount
+    ApplyDiscount -> ShippingCalc
+    ShippingCalc -> TotalAmount
+    TotalAmount -> PaymentInput
+    PaymentInput -> PaymentProcess
+    PaymentProcess -> PaymentSuccess [label="Başarılı"]
+    PaymentProcess -> PaymentFail [label="Başarısız"]
+    PaymentFail -> PaymentInput
+    PaymentSuccess -> End
+    AuthFail -> End
+}
