@@ -1,0 +1,152 @@
+Başla
+
+    GirişYap(ogrenci)
+
+    DersListesiniGoster()
+
+    secilenDersler = BoşListe
+    seçimDevamEdiyor = True
+
+    while (seçimDevamEdiyor)
+        secim = DersSec()
+        Eğer (secim == "bitir")
+            seçimDevamEdiyor = False
+        Değilse
+            secilenDersler.Ekle(secim)
+        Bitir
+    Bitir
+
+    DersKayitKontrolleri(secilenDersler, ogrenci)
+
+Bitir
+Fonksiyon DersKayitKontrolleri(secilenDersler, ogrenci)
+    toplamKredi = 0
+
+    foreach ders in secilenDersler
+
+        Eğer (KontenjanDoluMu(ders))
+            EKRANA_YAZ("Kontenjan dolu: " + ders)
+            Dön False
+        Bitir
+
+        Eğer (OnKosulSaglandiMi(ogrenci, ders) == False)
+            EKRANA_YAZ("Ön koşul sağlanmadı: " + ders)
+            Dön False
+        Bitir
+
+        Eğer (ZamanCakisiyorMu(secilenDersler, ders))
+            EKRANA_YAZ("Zaman çakışması: " + ders)
+            Dön False
+        Bitir
+
+        toplamKredi = toplamKredi + ders.kredi
+    Bitir
+
+    Eğer (toplamKredi > krediLimiti)
+        EKRANA_YAZ("Kredi limiti aşıldı.")
+        Dön False
+    Bitir
+
+    Eğer (DanismanOnayiAlindiMi(ogrenci) == False)
+        EKRANA_YAZ("Danışman onayı alınmadı.")
+        Dön False
+    Bitir
+
+    Dön True
+Bitir
+Başla
+    GirişYap(ogrenci)
+
+    dersListesi = DersListesiniGetir()
+
+    secilenDersler = BoşListe
+
+    Döngü ders in dersListesi
+        EKRANA_YAZ(ders)
+    Bitir
+
+    while (seçimDevamEdiyor)
+        secim = DersSec()
+        Eğer (seçim == "bitir")
+            seçimDevamEdiyor = False
+        Değilse
+            secilenDersler.Ekle(secim)
+        Bitir
+    Bitir
+
+    toplamKredi = 0
+    kontrollerBasarili = True
+
+    foreach ders in secilenDersler
+        Eğer (KontenjanDoluMu(ders))
+            EKRANA_YAZ("Kontenjan dolu: " + ders)
+            kontrollerBasarili = False
+            break
+        Bitir
+
+        Eğer (OnKosulSaglandiMi(ogrenci, ders) == False)
+            EKRANA_YAZ("Ön koşul sağlanmadı: " + ders)
+            kontrollerBasarili = False
+            break
+        Bitir
+
+        Eğer (ZamanCakisiyorMu(secilenDersler, ders))
+            EKRANA_YAZ("Zaman çakışması: " + ders)
+            kontrollerBasarili = False
+            break
+        Bitir
+
+        toplamKredi = toplamKredi + ders.kredi
+    Bitir
+
+    Eğer (toplamKredi > krediLimiti)
+        EKRANA_YAZ("Kredi limiti aşıldı.")
+        kontrollerBasarili = False
+    Bitir
+
+    Eğer (DanismanOnayiAlindiMi(ogrenci) == False)
+        EKRANA_YAZ("Danışman onayı alınmadı.")
+        kontrollerBasarili = False
+    Bitir
+
+    Eğer (kontrollerBasarili)
+        KaydetDersKayitlari(ogrenci, secilenDersler)
+        EKRANA_YAZ("Ders kaydı başarıyla tamamlandı.")
+    Değilse
+        EKRANA_YAZ("Ders kaydı yapılamadı. Lütfen kontrolleri gözden geçirin.")
+    Bitir
+Bitir
+digraph DersKayitSistemi {
+    node [shape=box];
+    Start [label="Başla"];
+    Giris [label="Giriş Yap"];
+    DersListesi [label="Ders Listesini Getir"];
+    DersSecimi [label="Ders Seçimi"];
+    
+    KontenjanKontrol [shape=diamond, label="Kontenjan Dolu mu?"];
+    OnKosulKontrol [shape=diamond, label="Ön Koşul Sağlandı mı?"];
+    ZamanCakismaKontrol [shape=diamond, label="Zaman Çakışması var mı?"];
+    KrediLimitiKontrol [shape=diamond, label="Kredi Limiti Aşıldı mı?"];
+    DanismanOnayKontrol [shape=diamond, label="Danışman Onayı Alındı mı?"];
+
+    KayitBasarili [label="Ders Kaydı Başarılı"];
+    KayitBasarisiz [label="Ders Kaydı Başarısız"];
+
+    Start -> Giris -> DersListesi -> DersSecimi -> KontenjanKontrol;
+
+    KontenjanKontrol -> OnKosulKontrol [label="Hayır"];
+    KontenjanKontrol -> KayitBasarisiz [label="Evet"];
+
+    OnKosulKontrol -> ZamanCakismaKontrol [label="Evet"];
+    OnKosulKontrol -> KayitBasarisiz [label="Hayır"];
+
+    ZamanCakismaKontrol -> KrediLimitiKontrol [label="Hayır"];
+    ZamanCakismaKontrol -> KayitBasarisiz [label="Evet"];
+
+    KrediLimitiKontrol -> DanismanOnayKontrol [label="Hayır"];
+    KrediLimitiKontrol -> KayitBasarisiz [label="Evet"];
+
+    DanismanOnayKontrol -> KayitBasarili [label="Evet"];
+    DanismanOnayKontrol -> KayitBasarisiz [label="Hayır"];
+}
+
