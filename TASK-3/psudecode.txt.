@@ -1,0 +1,50 @@
+Algoritma RandevuAlma
+    Başla
+    // Kimlik doğrulama
+    Kullanıcıdan kimlik bilgisi al
+    Eğer kimlik doğrulama başarılı ise
+        // Poliklinik seçimi
+        Poliklinik listesini göster
+        Kullanıcıdan poliklinik seçimi al
+        
+        // Doktor listesi görüntüleme
+        Seçilen polikliniğe ait doktor listesini getir ve göster
+        
+        // Uygun saatleri gösterme
+        Kullanıcıdan doktor seçimi al
+        Seçilen doktora uygun randevu saatlerini getir ve göster
+        
+        // Randevu onaylama
+        Kullanıcıdan randevu saatini seçmesini iste
+        Randevuyu kaydet
+        
+        // SMS gönderme
+        Randevu bilgilerini içeren SMS gönder
+        
+        "Randevunuz başarıyla oluşturuldu." mesajı göster
+    Aksi halde
+        "Kimlik doğrulama başarısız." mesajı göster
+    Bitir
+Algoritma TahlilSonuclariGoruntuleme
+    Başla
+    // Kimlik doğrulama
+    Kullanıcıdan kimlik bilgisi al
+    Eğer kimlik doğrulama başarılı ise
+        // Tahlil varlığı kontrolü
+        Tahlil sonuçları veritabanında var mı kontrol et
+        Eğer tahlil sonucu varsa
+            // Sonuç hazır mı kontrolü
+            Eğer sonuç hazır ise
+                Sonuçları ekranda göster
+                PDF indirme seçeneği sun
+                Eğer kullanıcı PDF indir demiş ise
+                    PDF dosyasını indir
+                Bitir
+            Aksi halde
+                "Sonuçlar henüz hazırlanıyor, lütfen daha sonra tekrar deneyin." mesajı göster
+            Bitir
+        Aksi halde
+            "Tahlil sonucu bulunamadı." mesajı göster
+    Aksi halde
+        "Kimlik doğrulama başarısız." mesajı göster
+    Bitir
