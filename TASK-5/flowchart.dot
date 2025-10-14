@@ -1,0 +1,48 @@
+digraph SmartHomeSecuritySystem {
+
+    rankdir=TB; // Top to Bottom akış
+    node [shape=box, style=filled, color=lightgray];
+
+    Start [label="Başla\n(Sonsuz Döngü Başlat)", shape=oval, color=lightblue];
+
+    ReadSensors [label="Tüm Sensörleri Oku"];
+    CheckSensorErrors [label="Sensör Hatalarını Kontrol Et"];
+    EvaluateThreat [label="Tehdit Seviyesini Değerlendir"];
+    
+    CompareThreat [label="Yeni tehdit mevcut tehditten yüksek mi?", shape=diamond];
+    
+    TakeActions [label="Tehdide Göre Aksiyon Al"];
+    CheckAlarmActive [label="Alarm Aktif mi?", shape=diamond];
+    WaitForReset [label="Reset Komutu Geldi mi?", shape=diamond];
+    
+    ResetAlarm [label="Alarmı Sıfırla\n(Siren durdur, sistem sıfırla)"];
+    ContinueAlarm [label="Alarm Devam Ediyor"];
+    
+    UpdateThreat [label="Tehdit Seviyesi Güncelle"];
+    Sleep [label="Kısa Bekleme (sleep)"];
+    
+    LoopBack [label="Sonraki Döngü Iterasyonu", shape=oval, color=lightblue];
+
+    // Akışlar
+    Start -> ReadSensors;
+    ReadSensors -> CheckSensorErrors;
+    CheckSensorErrors -> EvaluateThreat;
+    EvaluateThreat -> CompareThreat;
+
+    CompareThreat -> TakeActions [label="Evet"];
+    CompareThreat -> CheckAlarmActive [label="Hayır"];
+
+    TakeActions -> CheckAlarmActive;
+    CheckAlarmActive -> WaitForReset [label="Evet"];
+    CheckAlarmActive -> UpdateThreat [label="Hayır"];
+
+    WaitForReset -> ResetAlarm [label="Evet"];
+    WaitForReset -> ContinueAlarm [label="Hayır"];
+
+    ResetAlarm -> Sleep;
+    ContinueAlarm -> Sleep;
+    UpdateThreat -> Sleep;
+
+    Sleep -> LoopBack;
+    LoopBack -> ReadSensors;
+}
