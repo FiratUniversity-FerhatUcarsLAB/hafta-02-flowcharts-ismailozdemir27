@@ -1,0 +1,76 @@
+digraph Giris {
+    node [shape=rectangle]
+    
+    Start [label="Başla"]
+    InputUsername [label="Kullanıcı adı al"]
+    InputPassword [label="Şifre al"]
+    CheckLogin [label="Kullanıcı bilgileri doğru mu?", shape=diamond]
+    LoginSuccess [label="Giriş başarılı"]
+    LoginFail [label="Giriş başarısız"]
+    End [label="Bitiş"]
+
+    Start -> InputUsername -> InputPassword -> CheckLogin
+    CheckLogin -> LoginSuccess [label="Evet"]
+    CheckLogin -> LoginFail [label="Hayır"]
+    LoginSuccess -> End
+    LoginFail -> End
+}
+digraph DersListesi {
+    node [shape=rectangle]
+
+    Start [label="Başla"]
+    GetStudentID [label="Öğrenci ID al"]
+    FetchCourseList [label="Bölüm, sınıf, dönem bilgisine göre dersleri getir"]
+    ShowCourses [label="Ders listesini göster"]
+    End [label="Bitiş"]
+
+    Start -> GetStudentID -> FetchCourseList -> ShowCourses -> End
+}
+digraph DersSecimiKontrol {
+    node [shape=rectangle]
+
+    Start [label="Başla"]
+    GetSelectedCourses [label="Ders seçimi yap"]
+    KontenjanKontrol [label="Kontenjan dolu mu?", shape=diamond]
+    OnKosulKontrol [label="Ön koşul sağlanıyor mu?", shape=diamond]
+    ZamanCakismaKontrol [label="Zaman çakışması var mı?", shape=diamond]
+    KrediTopla [label="Toplam krediye ekle"]
+    KrediLimitiKontrol [label="Kredi limiti aşıldı mı?", shape=diamond]
+    KontrolGecersiz [label="Kontrol hatası: kayıt geçersiz"]
+    KontrollerTamam [label="Tüm kontroller tamam"]
+
+    Start -> GetSelectedCourses -> KontenjanKontrol
+    KontenjanKontrol -> OnKosulKontrol [label="Hayır"]
+    KontenjanKontrol -> KontrolGecersiz [label="Evet"]
+
+    OnKosulKontrol -> ZamanCakismaKontrol [label="Evet"]
+    OnKosulKontrol -> KontrolGecersiz [label="Hayır"]
+
+    ZamanCakismaKontrol -> KrediTopla [label="Hayır"]
+    ZamanCakismaKontrol -> KontrolGecersiz [label="Evet"]
+
+    KrediTopla -> KrediLimitiKontrol
+    KrediLimitiKontrol -> KontrolGecersiz [label="Evet"]
+    KrediLimitiKontrol -> KontrollerTamam [label="Hayır"]
+}
+digraph Onaylama {
+    node [shape=rectangle]
+
+    Start [label="Başla"]
+    KontrolDurumu [label="Kontroller geçerli mi?", shape=diamond]
+    DanismanOnayi [label="Danışman onayı al", shape=diamond]
+    KayitBasarili [label="✔ Kayıt tamamlandı"]
+    KayitRedDanisman [label="✖ Danışman reddetti"]
+    KayitBasarisiz [label="✖ Kayıt başarısız"]
+    End [label="Bitiş"]
+
+    Start -> KontrolDurumu
+    KontrolDurumu -> DanismanOnayi [label="Evet"]
+    KontrolDurumu -> KayitBasarisiz [label="Hayır"]
+    DanismanOnayi -> KayitBasarili [label="Evet"]
+    DanismanOnayi -> KayitRedDanisman [label="Hayır"]
+    
+    KayitBasarili -> End
+    KayitRedDanisman -> End
+    KayitBasarisiz -> End
+}
