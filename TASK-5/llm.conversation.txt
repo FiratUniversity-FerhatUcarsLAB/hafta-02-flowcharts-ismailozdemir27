@@ -1,0 +1,15 @@
+ismail özemir
+250541109
+
+S¨urekli C¸alı¸san Sistemler ˙ I¸cin:
+ Sonsuz D¨ong¨u Yakla¸sımı
+ “Akıllı ev g¨uvenlik sistemi 7/24 ¸calı¸sır. Ana d¨ong¨u i¸cinde sens¨or okuma,
+ tehdit algılama, alarm verme ve bildirim g¨onderme s¨ure¸clerini i¸ceren
+ pseudocode yaz.”
+ ¨ Ozel Notlar:
+ Ana D¨ ONG¨ U s¨urekli ¸calı¸sır (DO˘ GRU ko¸sulu ile)
+ Her d¨ong¨u iterasyonunda t¨um sens¨orler kontrol edilir   pseudecodu yazar mısn 
+ Tehdit seviyesine g¨ore farklı aksiyonlar alınır
+ Alarm sıfırlama komutu gelene kadar devam eder
+Şunu dedin:
+peki bu pseudecodu dot diline çevirir misin
