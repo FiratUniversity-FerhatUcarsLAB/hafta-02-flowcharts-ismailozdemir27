@@ -1,0 +1,154 @@
+
+Şunu dedin:
+ Karma¸sık Sistem ˙ I¸cin Adım Adım Yakla¸sım:
+ 1. Genel Yapı
+ “¨ Universite ders kayıt sisteminin genel akı¸sını a¸cıkla: giri¸s, ders listesi, ders
+ se¸cimi, kontroller, onaylama.”
+ 2. Kontrol Mekanizmaları
+ “Ders kaydında yapılması gereken kontrolleri listele: kontenjan, ¨on ko¸sul,
+ zaman ¸cakı¸sması, kredi limiti, danı¸sman onayı.”
+ 3. Pseudocode Olu¸sturma    
+ “T¨um bu kontrollerle birlikte detaylı pseudocode yaz. ˙ I¸c i¸ce E˘ GER-˙ ISE
+ yapıları ve d¨ong¨uler kullan.”
+ 4. DOT D¨on¨u¸s¨um¨u
+ “Bu pseudocode’u Graphviz DOT diline ¸cevir. Her kontrol noktasını
+ diamond ile g¨oster.”
+ChatGPT:
+Üniversite ders kayıt sistemi için adım adım yaklaşım aşağıdaki gibidir:
+
+1. Genel Yapı – Sistem Akışı
+Bir üniversite ders kayıt sistemi şu adımlardan oluşur:
+
+Giriş (Authentication):
+Öğrenci kullanıcı adı ve şifreyle sisteme giriş yapar.
+
+Ders Listesi Gösterimi:
+Öğrenciye, dönem içinde açılmış ve kendisinin alabileceği derslerin listesi sunulur.
+
+Ders Seçimi:
+Öğrenci almak istediği dersleri seçer (çoklu seçim yapılabilir).
+
+Kontrollerin Yapılması:
+Seçilen her ders için aşağıdaki kontroller yapılır:
+
+Kontenjan var mı?
+
+Ön koşul sağlanmış mı?
+
+Zaman çakışması var mı?
+
+Toplam kredi limiti aşılmış mı?
+
+Danışman Onayı:
+Tüm kontrollerden sonra danışmanın onayına gönderilir.
+
+Onaylama ve Kayıt:
+Danışman onayladıktan sonra kayıt tamamlanır.
+
+2. Kontrol Mekanizmaları
+Her ders seçimi için sistem şu kontrolleri yapmalıdır:
+
+Kontenjan Kontrolü:
+Dersin kalan kontenjanı var mı?
+
+Ön Koşul Kontrolü:
+Dersi alabilmek için gerekli olan önceki ders(ler) alınmış mı?
+
+Zaman Çakışması Kontrolü:
+Seçilen dersler aynı gün/saatte mi?
+
+Kredi Limiti Kontrolü:
+Öğrencinin seçtiği derslerin toplam kredisi maksimum limiti aşıyor mu?
+
+Danışman Onayı:
+Sistem kontrolleri geçse bile, kayıt danışman onayı olmadan tamamlanamaz.
+
+3. Pseudocode – Ders Kayıt Süreci
+Giriş yap (kullanıcı adı, şifre)
+EĞER giriş başarılıysa:
+    göster_ders_listesi()
+    öğrenci_seçilen_dersler = ders_seç()
+
+    toplam_kredi = 0
+    tüm_kontroller_geçti = TRUE
+
+    DÖNGÜ ders IN öğrenci_seçilen_dersler:
+        EĞER ders.kontenjan == 0:
+            yazdır("Kontenjan dolu: " + ders.ad)
+            tüm_kontroller_geçti = FALSE
+        DEĞİLSE EĞER NOT öğrenci.önkoşulları_saglamış(ders):
+            yazdır("Ön koşul eksik: " + ders.ad)
+            tüm_kontroller_geçti = FALSE
+        DEĞİLSE EĞER ders.zaman in öğrenci.seçili_ders_zamanları:
+            yazdır("Zaman çakışması: " + ders.ad)
+            tüm_kontroller_geçti = FALSE
+        DEĞİLSE:
+            toplam_kredi += ders.kredi
+            öğrenci.seçili_ders_zamanları.append(ders.zaman)
+
+    EĞER toplam_kredi > öğrenci.kredi_limiti:
+        yazdır("Kredi limiti aşıldı.")
+        tüm_kontroller_geçti = FALSE
+
+    EĞER tüm_kontroller_geçti:
+        yazdır("Tüm sistem kontrolleri geçildi. Danışman onayı bekleniyor.")
+        danışman_onayı = danışmana_gönder_ve_onay_al()
+        
+        EĞER danışman_onayı:
+            kayıt_tamamla()
+            yazdır("Ders kaydı başarıyla tamamlandı.")
+        DEĞİLSE:
+            yazdır("Danışman onayı reddedildi.")
+    DEĞİLSE:
+        yazdır("Kayıt işlemi başarısız. Yukarıdaki hataları düzeltin.")
+DEĞİLSE:
+    yazdır("Giriş başarısız.")
+4. DOT Dönüşümü (Graphviz DOT formatında Akış Diyagramı)
+Her kontrol noktasını diamond (elmas) şekli ile gösteriyoruz.
+
+digraph DersKayit {
+    node [shape=rectangle]
+
+    Giris [label="Giriş Yap"]
+    GirisKontrol [label="Giriş Başarılı mı?", shape=diamond]
+    DersListesi [label="Ders Listesini Göster"]
+    DersSecimi [label="Ders Seç"]
+    KontenjanKontrol [label="Kontenjan Var mı?", shape=diamond]
+    OnKosulKontrol [label="Ön Koşul Sağlanmış mı?", shape=diamond]
+    ZamanCakismaKontrol [label="Zaman Çakışması Var mı?", shape=diamond]
+    KrediKontrol [label="Kredi Limiti Aşıldı mı?", shape=diamond]
+    DanismanOnay [label="Danışman Onayı?", shape=diamond]
+    KayitTamam [label="Kayıt Başarılı"]
+    KayitBasarisiz [label="Kayıt Başarısız"]
+    Hata [label="Hata Mesajı Göster"]
+
+    Giris -> GirisKontrol
+    GirisKontrol -> DersListesi [label="Evet"]
+    GirisKontrol -> Hata [label="Hayır"]
+
+    DersListesi -> DersSecimi
+    DersSecimi -> KontenjanKontrol
+
+    KontenjanKontrol -> OnKosulKontrol [label="Evet"]
+    KontenjanKontrol -> Hata [label="Hayır"]
+
+    OnKosulKontrol -> ZamanCakismaKontrol [label="Evet"]
+    OnKosulKontrol -> Hata [label="Hayır"]
+
+    ZamanCakismaKontrol -> KrediKontrol [label="Hayır"]  // çakışma yoksa
+    ZamanCakismaKontrol -> Hata [label="Evet"]
+
+    KrediKontrol -> DanismanOnay [label="Hayır"] // limit aşılmamışsa
+    KrediKontrol -> Hata [label="Evet"]
+
+    DanismanOnay -> KayitTamam [label="Evet"]
+    DanismanOnay -> KayitBasarisiz [label="Hayır"]
+}
+İstersen bu DOT kodunu bir .dot dosyasına kaydedip Graphviz gibi araçlarla görsel diyagram oluşturabilirsin. Yardımcı olmamı istersen diyagram halini de görselleştirebilirim.
+
+Şunu dedin:
+teşekkür edrim
+ChatGPT:
+Rica ederim, her zaman yardımcı olmaktan memnuniyet duyarım! 😊
+Başka bir konuda da yardıma ihtiyacın olursa çekinmeden yazabilirsin.
+Kolaylıklar ve başarılar dilerim! 🎓📘
