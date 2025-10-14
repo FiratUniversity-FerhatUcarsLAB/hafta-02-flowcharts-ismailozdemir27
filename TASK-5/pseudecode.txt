@@ -1,0 +1,146 @@
+// Sabitler / Türler
+enum ThreatLevel { NONE, LOW, MEDIUM, HIGH, CRITICAL }
+struct SensorReading {
+    id: String
+    type: String
+    value: Any
+    timestamp: Time
+    status: String // "OK", "ERROR"
+}
+
+// Sistem durumu
+bool alarmActive = false
+ThreatLevel currentThreat = NONE
+Time lastNotificationTime = 0
+const NOTIFICATION_COOLDOWN = 60 seconds // same notification cooldown
+const LOOP_DELAY = 500 ms // döngüde kısa bekleme (sensörlere bağlı olarak ayarla)
+
+// Yardımcı fonksiyonlar
+function readAllSensors() -> List<SensorReading>:
+    sensors = getRegisteredSensors()
+    readings = []
+    for s in sensors:
+        r = s.read() // sensörün anlık okumasi; hata varsa status "ERROR" olmalı
+        readings.append(r)
+    return readings
+
+function evaluateThreat(readings: List<SensorReading>) -> ThreatLevel:
+    // Basit karar kuralı örnekleri; gerçek sistemde ML/istatistik olabilir
+    if any(reading.type == "smoke" and reading.value >= SMOKE_CRITICAL):
+        return CRITICAL
+    if any(reading.type == "glass_break" and reading.value == TRUE):
+        return HIGH
+    if any(reading.type == "door" and reading.value == "open" and isNightTime()):
+        return MEDIUM
+    if any(reading.type == "motion" and reading.value == TRUE and noOwnerAtHome()):
+        return LOW
+    return NONE
+
+function takeActionsForThreat(level: ThreatLevel):
+    switch(level):
+        case NONE:
+            if alarmActive == false:
+                // normal durumda kısa durum kaydı/günlük
+                log("Status OK")
+            else:
+                // eğer alarm hâlâ aktifse, bekle reset komutunu
+                log("Alarm aktif, bekleniyor: reset komutu")
+            break
+
+        case LOW:
+            // neden düşük: örn. dış hareketsizlik
+            notifyUser("Düşük seviye şüphe: hareket algılandı", priority="low")
+            logEvent("LOW threat")
+            break
+
+        case MEDIUM:
+            // kapı açık/kırılma şüphesi vs.
+            notifyUser("Orta seviye tehdit: kontrol edin", priority="medium")
+            startRecordingCameras(duration=120) // 2 dakika kaydı
+            logEvent("MEDIUM threat")
+            break
+
+        case HIGH:
+            // daha ciddi: cam kırılması, izinsiz giriş
+            alarmActive = true
+            triggerSiren(volume=80)
+            lockAllDoors()
+            notifyUser("Yüksek tehdit! Siren çalıyor. Güvenlik görevlisi bilgilendiriliyor.", priority="high")
+            startLiveStreamToUser()
+            logEvent("HIGH threat")
+            break
+
+        case CRITICAL:
+            // yangın, gaz kaçağı vb. hayati tehlike
+            alarmActive = true
+            triggerSiren(volume=100)
+            unlockExitDoorsForEvacuations() // güvenlik protokolüne göre
+            notifyEmergencyServices(type="fire_or_gas", includeLocation=true)
+            notifyUser("CRITICAL: Acil durum servisi çağrıldı!", priority="critical")
+            logEvent("CRITICAL threat")
+            break
+
+function notifyUser(message: String, priority: String):
+    now = currentTime()
+    if now - lastNotificationTime >= NOTIFICATION_COOLDOWN:
+        sendPushNotification(userDevices(), message, priority)
+        lastNotificationTime = now
+    else:
+        log("Notification suppressed due to cooldown")
+
+function waitForResetCommand() -> bool:
+    // Sinyal/komut gelene kadar true döndürür; sistem yine de sensör okumaya devam edebilir
+    if receiveCommand("RESET_ALARM") == TRUE:
+        return TRUE
+    return FALSE
+
+// Ana döngü - SONSUZ
+while (true): // DOĞRU koşulu ile sonsuz döngü
+    readings = readAllSensors()
+
+    // Sensör hatalarını raporla
+    for r in readings:
+        if r.status == "ERROR":
+            logEvent("Sensor error: " + r.id)
+            notifyUser("Sensör hatası: " + r.id, priority="low")
+
+    // Tehdit değerlendirmesi
+    newThreat = evaluateThreat(readings)
+
+    // Tehdit seviyesi yükselmişse hemen aksiyon al
+    if newThreat > currentThreat:
+        currentThreat = newThreat
+        takeActionsForThreat(currentThreat)
+    else if newThreat < currentThreat:
+        // Tehdit azalmış olabilir; ancak alarm aktif ise reset gelene kadar sireni kaplama
+        currentThreat = newThreat
+        logEvent("Threat level decreased to " + currentThreat)
+
+        if currentThreat == NONE and alarmActive == false:
+            // normal duruma dönüş işlemleri
+            resetTemporaryStates()
+            log("Sistem normal")
+
+    else:
+        // threat level aynı - eğer alarm aktifse alarmı sürdür
+        if alarmActive:
+            log("Alarm aktif; hala bekleniyor: reset komutu")
+            // opsiyonel: periyodik bildirim/güncelleme
+            if timeSince(lastNotificationTime) >= NOTIFICATION_COOLDOWN:
+                notifyUser("Alarm hâlâ aktif. Lütfen reset komutu gönderin.", priority="high")
+
+    // Eğer alarm aktifse, alarm ancak reset komutuyla dursun
+    if alarmActive:
+        if waitForResetCommand() == TRUE:
+            alarmActive = false
+            currentThreat = NONE
+            stopSiren()
+            unlockOrRelockDoorsAccordingToPolicy()
+            notifyUser("Alarm sıfırlandı.", priority="medium")
+            logEvent("Alarm reset by user")
+        else:
+            // reset gelmedi → alarm devam eder; yine de sensör okumalarına devam ediliyor
+            // (ör. acil servisler çağrıldıysa onlarla iletişim sürer)
+            maintainAlarmProcedures()
+    // Döngü gecikmesi (CPU kullanımını azaltmak için kısa bekleme)
+    sleep(LOOP_DELAY)
